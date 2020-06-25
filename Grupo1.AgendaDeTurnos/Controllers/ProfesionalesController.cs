@@ -94,7 +94,7 @@ namespace Grupo1.AgendaDeTurnos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PrestacionId,CentroId,Id,Nombre,Apellido,Dni,Rol,Username")] Profesional profesional, string password, List<int> listDias)
         {
-            string username = profesional.Username;
+            string username = profesional.Username.ToUpper();
             if (verificarExistenciaDeUsuario(username))
             {
                 ViewBag.Error = "El usuario ya existe";
