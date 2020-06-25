@@ -10,51 +10,15 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Disponibilidades">
+        <form asp-controller="Profesionales" asp-action="EditarDisponibilidades">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="PrestacionId" class="control-label"></label>
-                <select asp-for="PrestacionId" class="form-control" asp-items="ViewBag.PrestacionId"></select>
-                <span asp-validation-for="PrestacionId" class="text-danger"></span>
-            </div>
             <div class="form-group">
                 <label class="control-label">Disponibilidades</label>
                 <select name="DisponibilidadesId" class="form-control" asp-items="ViewBag.Disponibilidades" multiple></select>
                 <span asp-validation-for="Disponibilidades" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="CentroId" class="control-label"></label>
-                <select asp-for="CentroId" class="form-control" asp-items="ViewBag.CentroId"></select>
-                <span asp-validation-for="CentroId" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Apellido" class="control-label"></label>
-                <input asp-for="Apellido" class="form-control" />
-                <span asp-validation-for="Apellido" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Dni" class="control-label"></label>
-                <input asp-for="Dni" class="form-control" />
-                <span asp-validation-for="Dni" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Rol" class="control-label"></label>
-                <select asp-for="Rol" class="form-control"></select>
-                <span asp-validation-for="Rol" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control" />
-                <span asp-validation-for="Username" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Guardar" class="btn btn-primary" />
             </div>
         </form>
     </div>
@@ -65,10 +29,10 @@
             <select name="dia" class="form-control" asp-items="ViewBag.DiasSemana"></select>
 
             <label>Desde</label>
-            <input type="number" name="desde" />
+            <input type="number" min="0" max="23" name="desde" />
             <label>Hasta</label>
-            <input type="number" name="hasta" />
-            <input type="submit" asp-route-rol =@nameof(RolesEnum.PROFESIONAL) />
+            <input type="number" min="0" max="23" name="hasta" />
+            <input type="submit" value="Agregar" />
         </form>
     </div>
 </div>

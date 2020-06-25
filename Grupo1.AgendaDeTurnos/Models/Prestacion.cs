@@ -22,7 +22,7 @@ namespace Grupo1.AgendaDeTurnos.Models
 
 
         [Required(ErrorMessage = "El campo es requerido")]
-        [MaxLength(2, ErrorMessage = "La longitud máxima del campo es de 3 caracteres")]
+      //  [MaxLength(2, ErrorMessage = "La longitud máxima del campo es de 3 caracteres")]
         [Display(Name = "Duracion en horas")]
         public int DuracionHoras { get; set; }
 

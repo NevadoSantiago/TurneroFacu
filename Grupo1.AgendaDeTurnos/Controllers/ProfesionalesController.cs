@@ -64,6 +64,10 @@ namespace Grupo1.AgendaDeTurnos.Controllers
             ViewData["DiasSemana"] = new SelectList(Enum.GetValues(typeof(DiasEnum)).Cast<DiasEnum>());
             ViewData["CentroId"] = new SelectList(_context.Centros, "Id", "Nombre");
             ViewData["PrestacionId"] = new SelectList(_context.Prestaciones, "Id", "Nombre");
+            if (disponibilidades.Count != 0)
+            {
+                ViewBag.estaLleno = "1";
+            }
 
 
             return View();
@@ -127,12 +131,15 @@ namespace Grupo1.AgendaDeTurnos.Controllers
             List<Disponibilidad> disponibilidades = await _context.Disponibilidades
                   .Where(d => d.IdProfesional == 0)
               .ToListAsync();
-
-            foreach (Disponibilidad d in disponibilidades)
+            if(disponibilidades.Count != 0)
             {
-                _context.Disponibilidades.Remove(d);
+                foreach (Disponibilidad d in disponibilidades)
+                {
+                    _context.Disponibilidades.Remove(d);
+                }
+                _context.SaveChanges();
             }
-            _context.SaveChanges();
+
         }
 
         [Authorize(Roles = nameof(RolesEnum.ADMINISTRADOR))]
@@ -153,6 +160,7 @@ namespace Grupo1.AgendaDeTurnos.Controllers
             return View(profesional);
         }
 
+        [HttpGet]
         [Authorize(Roles = nameof(RolesEnum.PROFESIONAL))]
         public async Task<IActionResult> Disponibilidades()
         {
@@ -172,11 +180,29 @@ namespace Grupo1.AgendaDeTurnos.Controllers
                 profesional.Disponibilidades.Select(d=>d.Id).ToList());
         return View(profesional);
         }
-        public async Task<IActionResult> EditarDisponibilidades(List<int> listDisponibilidades)
+        public async Task<IActionResult> Disponibilidades(List<int> nuevasDisponibilidades)
+        {
+            int profesionalId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            var profesional = await _context.Profesionales
+                .Include(p => p.Disponibilidades)
+                .Where(p => p.Id == profesionalId)
+                .SingleOrDefaultAsync();
+            if (profesional == null)
+            {
+                return NotFound();
+            }
+            ViewData["DiasSemana"] = new SelectList(Enum.GetValues(typeof(DiasEnum)).Cast<DiasEnum>());
+            ViewData["Disponibilidades"] = new MultiSelectList(_context.Disponibilidades.Where(d => d.IdProfesional == 0 || d.IdProfesional == profesionalId),
+                "Id", "Descripcion",
+                profesional.Disponibilidades.Select(d => d.Id).ToList());
+            return View(profesional);
+        }
+        public async Task<IActionResult> EditarDisponibilidades(List<int> DisponibilidadesId)
         {
             int profesionalId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             List<Disponibilidad> disponibilidadesNuevas = new List<Disponibilidad>();
-            foreach (int idDis in listDisponibilidades)
+            foreach (int idDis in DisponibilidadesId)
             {
                 Disponibilidad d = _context.Disponibilidades.Find(idDis);
                 disponibilidadesNuevas.Add(d);
@@ -187,8 +213,10 @@ namespace Grupo1.AgendaDeTurnos.Controllers
                 .SingleOrDefaultAsync();
 
             profesional.Disponibilidades = disponibilidadesNuevas;
+            _context.Profesionales.Update(profesional);
+           await _context.SaveChangesAsync();
             borrarDisponibilidadesNoRelacionadas();
-            return RedirectToAction("Home");
+            return RedirectToAction("Index","Home");
         }
 
         [Authorize(Roles = nameof(RolesEnum.ADMINISTRADOR))]

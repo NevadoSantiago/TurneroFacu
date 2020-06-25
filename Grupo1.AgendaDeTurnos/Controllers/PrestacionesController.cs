@@ -45,7 +45,7 @@ namespace Grupo1.AgendaDeTurnos.Controllers
             return View(prestacion);
         }
 
-        // GET: Prestacions/Create
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
@@ -54,7 +54,6 @@ namespace Grupo1.AgendaDeTurnos.Controllers
         // POST: Prestacions/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nombre,DuracionHoras,Monto")] Prestacion prestacion)
         {

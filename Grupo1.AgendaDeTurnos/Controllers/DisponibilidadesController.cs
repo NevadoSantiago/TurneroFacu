@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Grupo1.AgendaDeTurnos.Database;
 using Grupo1.AgendaDeTurnos.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Grupo1.AgendaDeTurnos.Controllers
 {
@@ -27,14 +28,42 @@ namespace Grupo1.AgendaDeTurnos.Controllers
         {
             return View(await _context.Disponibilidades.ToListAsync());
         }
-        public IActionResult AgregarDisponibilidad(int desde, int hasta, DiasEnum dia, string rol)
+
+        public async Task<IActionResult> AgregarDisponibilidad(int desde, int hasta, DiasEnum dia)
         {
+
+            if(desde > hasta)
+            {
+                TempData["Error"] = "La hora desde debe ser mayor a la de finalizacion";
+                return RedirectToAction("Create", "Profesionales");
+            }
             Disponibilidad dis = new Disponibilidad(desde, hasta, dia);
             _context.Disponibilidades.Add(dis);
             _context.SaveChanges();
 
             ViewData["Disponibilidades"] = new MultiSelectList(_context.Disponibilidades, "Id", "Descripcion");
-            return RedirectToAction("Create", "Profesionales");
+            if (User.IsInRole(nameof(RolesEnum.ADMINISTRADOR))){
+                return RedirectToAction("Create", "Profesionales");
+            }
+            else
+            {
+                int profesionalId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+                var profesional = await _context.Profesionales
+                    .Include(p => p.Disponibilidades)
+                    .Where(p => p.Id == profesionalId)
+                    .SingleOrDefaultAsync();
+                if (profesional == null)
+                {
+                    return NotFound();
+                }
+                ViewData["DiasSemana"] = new SelectList(Enum.GetValues(typeof(DiasEnum)).Cast<DiasEnum>());
+                ViewData["Disponibilidades"] = new MultiSelectList(_context.Disponibilidades.Where(d => d.IdProfesional == 0 || d.IdProfesional == profesionalId),
+                    "Id", "Descripcion",
+                    profesional.Disponibilidades.Select(d => d.Id).ToList());
+                return RedirectToAction("Disponibilidades", "Profesionales");
+            }
+            
         }
 
         [Authorize(Roles = nameof(RolesEnum.ADMINISTRADOR))]
